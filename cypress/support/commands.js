@@ -1,5 +1,5 @@
 //Cypress.Commands.add, significa (Quero adicionar um novo comando ao cypress)
-//illMandatoryFieldsAndSubmit, quer dizer: preencha os campos obrigatorios e submete
+//fillMandatoryFieldsAndSubmit, quer dizer: preencha os campos obrigatorios e submete
 //function(){} de call back, que vai executar os passos que fazem o que o nome do mando diz, que é:
 // preenche os campos obrigatórios e submete
 

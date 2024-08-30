@@ -3,7 +3,7 @@
 /// <reference types="Cypress" />
 
 describe('Central de Atendimento ao Cliente TAT', function () {
-
+    const THREE_SECONDS_IN_MS = 3000
     beforeEach(function () {
         cy.visit('./src/index.html')
 
@@ -19,6 +19,7 @@ describe('Central de Atendimento ao Cliente TAT', function () {
     it('preenche os campos obrigatórios e envia o formulário', function () {
 
         const longText = ('Teste, teste, teste, teste, teste, teste, teste, teste, teste, teste, teste, teste, teste, teste, teste, teste, teste, teste, teste,')
+        cy.clock()
 
         cy.get('#firstName').type('Janete')
         cy.get('#lastName').type('Alves')
@@ -27,37 +28,75 @@ describe('Central de Atendimento ao Cliente TAT', function () {
         //com a propriedade delay e com o valor zero e ai o nosso teste roda mais rápido
         cy.get('#open-text-area').type(longText, { delay: 0 })
         cy.get('button[type="submit"]').click()
+
         cy.get('.success').should('be.visible')
+
+        cy.tick(THREE_SECONDS_IN_MS)
+
+        cy.get('.success').should('not.be.visible')
     })
+
+    it('preenche os campos obrigatórios e envia o formulário', function () {
+
+        cy.clock()
+        cy.get('#firstName').type('Janete')
+        cy.get('#lastName').type('Alves')
+        cy.get('#email').type('alvesjanete638@gmail.com')
+        cy.get('#open-text-area').type('Teste')
+        cy.get('button[type="submit"]').click()
+
+        cy.get('.success').should('be.visible')
+
+        cy.tick(THREE_SECONDS_IN_MS)
+
+        cy.get('.success').should('not.be.visible')
+    })
+
 
     //Exercício extra 2
     it('exibe mensagem de erro ao submeter o formulário com um email com formatação inválida', function () {
+
+        cy.clock()
         cy.get('#firstName').type('Janete')
         cy.get('#lastName').type('Alves')
         cy.get('#email').type('alvesjanete@exemplo,com')
         cy.get('#open-text-area').type('Teste')
         cy.get('button[type="submit"]').click()
+
         cy.get('.error').should('be.visible')
+
+        cy.tick(THREE_SECONDS_IN_MS)
+
+        cy.get('.error').should('not.be.visible')
     })
 
     //Exercício extra 3
-    it('campo telefone continua vazio quando preenchido com valor não númerico', function () {
-        cy.get('#phone')
-            .type('abcdefghij')
-            //validar se o valor é vazio
-            .should('have.value', '')
+    //Cypress._.times(3, function(){} esta executando esse caso de teste 3 vezes - aula 11
+    Cypress._.times(3, function () {
+        it('campo telefone continua vazio quando preenchido com valor não númerico', function () {
+            cy.get('#phone')
+                .type('abcdefghij')
+                //validar se o valor é vazio
+                .should('have.value', '')
 
 
+        })
     })
 
     //Exercício extra 4
     it('exibe mensagem de erro quando o telefone se torna obrigatório mas não é preenchido antes do envio do formulário', function () {
+        cy.clock()
         cy.get('#firstName').type('Janete')
         cy.get('#lastName').type('Alves')
         cy.get('#email').type('alvesjanete638@gmail.com')
         cy.get('#phone-checkbox').check()
         cy.get('button[type="submit"]').click()
+
         cy.get('.error').should('be.visible')
+
+        cy.tick(THREE_SECONDS_IN_MS)
+
+        cy.get('.error').should('not.be.visible')
     })
 
     //Exercício extra 5
@@ -87,16 +126,25 @@ describe('Central de Atendimento ao Cliente TAT', function () {
 
     //Exercício extra 6
     it('exibe mensagem de erro ao submeter o formulário sem preencher os campos obrigatórios', function () {
+        cy.clock()
         cy.get('button[type="submit"]').click()
         cy.get('.error')
             .should('be.visible')
+        cy.tick(THREE_SECONDS_IN_MS)
+        cy.get('.error').should('not.be.visible')
+
     })
 
     //Exercício extra 8
     it('envia o formuário com sucesso usando um comando customizado', function () {
+        cy.clock()
         cy.fillMandatoryFieldsAndSubmit()
 
         cy.get('.success').should('be.visible')
+
+        cy.tick(THREE_SECONDS_IN_MS)
+
+        cy.get('.success').should('not.be.visible')
     })
 
     //Aula 03
@@ -150,7 +198,7 @@ describe('Central de Atendimento ao Cliente TAT', function () {
             //e essa função recebe como argumento cada um dos elementos que foi retornando/selecionado pelo cy.get
             .each(function ($radio) {
                 //E daí para cada uma das iterações usamos o cy.wrap para empacotar esses elementos
-                //e poder mandar comandos do cypress como .check e shoul
+                //e poder mandar comandos do cypress como .check e should
                 //marcamos o primeiro, segundo e terceiro 1 de cada vez
                 cy.wrap($radio).check()
                 //e depois verifica se ele foi marcado
@@ -244,14 +292,46 @@ describe('Central de Atendimento ao Cliente TAT', function () {
     //Exercicio extra 1
     it('acessa a página da política de privacidade removendo o target e então clicando no link', function () {
         cy.get('#privacy a')
-        //o invoke é usado para remover a target para poder abrir a politica de privacidade 
-        //na mesma página onde o cypress esta rodando ao invés de uma nova janela
-        //isso porque o cypress não reconhece a outra aba, só reconhece a janela onde esta rodando o sistema
+            //o invoke é usado para remover a target para poder abrir a politica de privacidade 
+            //na mesma página onde o cypress esta rodando ao invés de uma nova janela
+            //isso porque o cypress não reconhece a outra aba, só reconhece a janela onde esta rodando o sistema
             .invoke('removeAttr', 'target')
             .click()
         //confirmando se contém o texto e depois validando
         cy.contains('Talking About Testing').should('be.visible')
     })
-    
- 
+
+    it('exibe e esconde as mensagens de sucesso e erro usando o .invoke', function () {
+        cy.get('.success')
+            .should('not.be.visible')
+            //chama o invoke show e ele vai Invocar, exibir o elemento que esta escondido
+            .invoke('show')
+            //validar que esta visivel
+            .should('be.visible')
+            //E se contém a mensagem ...
+            .and('contain', 'Mensagem enviada com sucesso.')
+            //depois invoca  o hide para esconder o elemento
+            .invoke('hide')
+            .should('not.be.visible')
+        cy.get('.error')
+            .should('not.be.visible')
+            .invoke('show')
+            .should('be.visible')
+            .and('contain', 'Valide os campos obrigatórios!')
+            .invoke('hide')
+            .should('not.be.visible')
+
+    })
+
+    it('preenche a area de texto usando o comando invoke', function(){
+        //usamos o Cypress. _ (lodash).repeat para criar dentro da variavel longText um texto longo que vai ser um texto de 200 caracteres
+        //onde ele vai ter  do zero aoo 9 repetinddo 20 vezes
+        const longText = Cypress._.repeat('0123456789', 20)
+        cy.get('#open-text-area')
+        //vamos invocar o valor 'val' da area de texto '#open-text-area'e depois setar nesse valor 'val' o valor longo que definimos na vareavel longText
+        .invoke('val', longText)
+        .should('have.value', longText)
+    })
+
+
 })
